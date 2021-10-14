@@ -116,9 +116,9 @@ RESOLVE OUTPUT PATH IN  R ---PENDING ACTION
 if __name__== '__main__':
     print('---Main Program starts----')
     usr = p6
-    cncpt = p7
+    bu = p7
     dept = p8
-    logs = open(usr+'_'+cncpt+'_'+dept+'_'+'LSTM_PLL.txt','w')
+    logs = open(usr+'_'+bu+'_'+dept+'_'+'LSTM.txt','w')
     sys.stdout = logs
     print('--Log file initiated----')
     #INPUT_PATH          = p1
@@ -130,24 +130,24 @@ if __name__== '__main__':
     VAR                  = p4     
     SCALER               = MinMaxScaler(feature_range=(0, 1)) # for the normalization of the continuos data
     NORMALIZE_VAR_LIST   = p5
-    histDataFilePath  =  HISTDATA_PATH  
-    leadDataFilePath  =  LEADATA_PATH
-    histDataset       = pd.read_csv(histDataFilePath)
-    leadDataset       = pd.read_csv(leadDataFilePath)
-    histDataset['TRDNG_WK_END_DT'] = pd.to_datetime(histDataset['TRDNG_WK_END_DT'])
-    leadDataset['TRDNG_WK_END_DT'] = pd.to_datetime(leadDataset['TRDNG_WK_END_DT'])
-    print('----HADS & LADS in environment-----')
+    traindatapath  =  TRAIN_PATH  
+    testdatapath  =   TEST_PATH
+    histDataset       = pd.read_csv(traindatapath)
+    leadDataset       = pd.read_csv(testdatapath)
+    histDataset['DATE'] = pd.to_datetime(histDataset['DATE'])
+    leadDataset['DATE'] = pd.to_datetime(leadDataset['DATE'])
+
     print('====================================')
     
     print('---Look for Hyperparameter file----')
-    p = r'/shared/sasdata03/ACOE_DEV/ordering_solution/ACoE_Ordering/Master_Ordering_Code/DEV/ver_2.0_testR/R_Code' ### That is hardcoded path
+    p = r'hardcode/path' ### That is hardcoded path
     
     import logging
     hyper = None
     try:
         #csvfile = open('test.xlsx',newline='')
-        hyper = pd.read_csv(p+'/'+cncpt+'_LSTM_TUNNED_HYPERPARAMETER.csv')
-        histDataset1 = pd.merge(histDataset,hyper,on=['STND_TRRTRY_NM','KEY'],how='left')
+        hyper = pd.read_csv(p+'/'+bu+'_LSTM_TUNNED_HYPERPARAMETER.csv')
+        histDataset1 = pd.merge(histDataset,hyper,on=['trrtry','KEY'],how='left')
     except IOError:
         logging.exception('')
         print("Oops! No such Hyperparameter file")
@@ -162,16 +162,16 @@ if __name__== '__main__':
 
     
     resultF    = pd.DataFrame()
-    terr = [v for v in histDataset['STND_TRRTRY_NM'].unique()]
+    terr = [v for v in histDataset['trrtry'].unique()]
     for ter in terr:
-        terrData   = histDataset1[histDataset1.STND_TRRTRY_NM==ter]
+        terrData   = histDataset1[histDataset1.trrtry==ter]
         optionList = list(set(terrData.KEY))
         print(len(optionList))
         for ind,option in enumerate(optionList):
             result   = pd.DataFrame()
             print('In progress' +'\n'+ter + '-----'+option )
-            histData = histDataset1[(histDataset1.STND_TRRTRY_NM==ter)& (histDataset1.KEY==option)]
-            leadData = leadDataset[(leadDataset.STND_TRRTRY_NM==ter)& (leadDataset.KEY==option)]
+            histData = histDataset1[(histDataset1.trrtry==ter)& (histDataset1.KEY==option)]
+            leadData = leadDataset[(leadDataset.trrtry==ter)& (leadDataset.KEY==option)]
             h = histData
             h['Flg'] = h['epoch']+h['batch_size']+h['DROP_OUT']+h['RCRNT_DROP_OUT']+h['IN_NEURON']+h['L1_NEURON']
             for i in h['Flg']:
